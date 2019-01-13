@@ -93,3 +93,21 @@ fetch('https://randomuser.me/api/asd')
     console.log('animationList', animationList);
 })()
 
+
+
+//Template Literals
+//Se puede inyectar código html de manera fácil
+function videoItemTemplate(src, title) {
+    return (
+        `<div class="primaryPlaylistItem">
+            <div class="primaryPlaylistItem-image">
+                <img src="${src}">
+            </div>
+            <h4 class="primaryPlaylistItem-title">
+                ${title}
+            </h4>
+        </div>
+    `)
+}
+console.log(videoItemTemplate);
+
