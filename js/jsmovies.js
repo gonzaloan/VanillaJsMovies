@@ -6,7 +6,11 @@
     async function getData(url) {
         const response = await fetch(url);
         const data = await response.json();
-        return data;
+        if (data.data.movie_count > 0) {
+            return data;
+        }
+        //Si no hay datos encontrados
+        throw new Error("No se encontró ningún resultado.");
     }
 
     const $form = document.getElementById('form');
@@ -29,42 +33,53 @@
         $featuringContainer.append($loader);
         const data = new FormData($form);
 
-        const {
-            //podemos ver dentro de los datos retornados
-            data: {
-                //Con esto podemos destructurar y dar el nombre pelis a la variable
-                movies: searchedMovie
-            }
-        } = await getData(`${BASE_API}list_movies.json?limit=1&query_term=${data.get('name')}`);
-        let HTMLString;
-        if (searchedMovie == undefined) {
+        try {
+            const {
+                //podemos ver dentro de los datos retornados
+                data: {
+                    //Con esto podemos destructurar y dar el nombre pelis a la variable
+                    movies: searchedMovie
+                }
+            } = await getData(`${BASE_API}list_movies.json?limit=1&query_term=${data.get('name')}`);
+            let HTMLString;
+            HTMLString = searchedMovieTemplate(searchedMovie[0]);
+            //inyectamos en HTML
+            $featuringContainer.innerHTML = HTMLString;
+        } catch (error) {
+            alert(error.message);
+            $loader.remove();
+            $home.classList.remove('search-active');
+
+        }
+        /*
             HTMLString = `
                 <div>
                     <h3> No hay resultados </h3>
                 </div>
             `;
-        } else {
-            HTMLString = searchedMovieTemplate(searchedMovie[0]);
-        }
-        //inyectamos en HTML
-        $featuringContainer.innerHTML = HTMLString;
-
-
-
+            */
     });
 
-    const { data: {
-        movies: actionList }
-    } = await getData(`${BASE_API}list_movies.json?genre=action`);
+    async function cacheExist(category){
+        const listName = `${category}List`;
+        const cacheList = window.localStorage.getItem(listName);
+        if(cacheList){
+            return JSON.parse(cacheList);
+        }else{
+            const { data: { movies: data}} = await getData(`${BASE_API}list_movies.json?genre=${category}`);
+            localStorage.setItem(listName, JSON.stringify(data));
+            return data;
+        }
+    }
+    const actionList = await cacheExist('action');
 
-    const { data: {
-        movies: terrorList }
-    } = await getData(`${BASE_API}list_movies.json?genre=terror`);
+    const terrorList= await cacheExist('terror');
+    
 
-    const { data: {
-        movies: animationList }
-    } = await getData(`${BASE_API}list_movies.json?genre=animation`);
-
+    const animationList= await cacheExist('animation');
+    
+    
+    
     const $actionContainer = document.querySelector('#action');
     const $terrorContainer = document.getElementById('terror');
     const $animationContainer = document.getElementById('animation');
@@ -146,40 +161,40 @@
         const modalImage = $modal.querySelector('img');
         const modalDescription = $modal.querySelector('p');
         const modalTitle = $modal.querySelector('h1');
-        
+
         $overlay.classList.add('active');
         $modal.style.animation = 'modalIn .8s forwards';
-        
+
         const id = $movie.dataset.id;
         const category = $movie.dataset.category;
-        
+
         const movie = findMovie(id, category);
-        
+
         //Ahora podemos hacer una búsqueda en la lista
         modalTitle.textContent = movie.title;
         modalImage.setAttribute('src', movie.medium_cover_image);
         modalDescription.textContent = movie.description_full;
-        
+
     }
-    
-    function findById(list, id){
-        return list.find(movie => movie.id === parseInt(id,10));
+
+    function findById(list, id) {
+        return list.find(movie => movie.id === parseInt(id, 10));
     }
     function findMovie(id, category) {
-        switch(category){
+        switch (category) {
             case "action": {
-                return findById(actionList,id);
-                
+                return findById(actionList, id);
+
             }
-            case "terror":{
-                return findById(terrorList,id);
-                
+            case "terror": {
+                return findById(terrorList, id);
+
             }
             default: {
-                return findById(animationList,id);   
+                return findById(animationList, id);
             }
         }
-        actionList.find(movie => movie.id === parseInt(id,10));
+        actionList.find(movie => movie.id === parseInt(id, 10));
     }
     function hideModal() {
         console.log("Aqui");
