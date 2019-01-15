@@ -4,5 +4,9 @@ Este proyecto consiste en la conexión a una api de películas **(https://yts.am
 
 Sólo posee archivos Html, css, js. 
 
+## Página se puede ver aquí:
+
+https://gonzaloan.github.io/peliculasVanillaJs/
+
 
 
