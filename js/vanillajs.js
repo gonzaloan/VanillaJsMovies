@@ -111,3 +111,31 @@ function videoItemTemplate(src, title) {
 }
 console.log(videoItemTemplate);
 
+
+
+//Destructuracion de objetos
+
+/**
+ * Podemos obtener un nombre y meternos dentro de sus subobjetos, por ejemplo en esta query
+ * tenemos el objeto data, dentro de data movies, y con los : le damos un nombre a nuestra variable
+ * para ser usada fuera de esto.
+ * Por esta razón luego podemos usar searchedMovie más abajo, así nos evitamos usar nombres feos de variables
+ * como data.movies[0] 
+ */
+const {
+    //podemos ver dentro de los datos retornados
+    data:{
+        //Con esto podemos destructurar y dar el nombre pelis a la variable
+        movies: searchedMovie 
+    }
+} = await getData(`${BASE_API}list_movies.json?limit=1&query_term=${data.get('name')}`);
+let HTMLString;
+if (searchedMovie == undefined) {
+    HTMLString = `
+        <div>
+            <h3> No hay resultados </h3>
+        </div>
+    `;
+} else {
+    HTMLString = searchedMovieTemplate(searchedMovie[0]);
+}
